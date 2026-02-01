@@ -1,0 +1,401 @@
+body {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+
+/* ================== Start Screen ================== */
+#start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s ease-in-out;
+}
+
+/* Applies to both start and info screens */
+.thumbnail-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+
+.overlay {
+    position: relative;
+    text-align: center;
+    color: #333;
+}
+
+/* Gif at the top */
+#start-gif {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+
+/* Heading */
+#start-screen h1 {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-size: 2.8em;
+    margin: 0;
+    color: #333;
+}
+
+#start-screen h1 .highlight {
+    color: #e63946; /* soft red/pink like reference */
+    font-weight: bold;
+}
+
+/* Small subtitle */
+#start-screen .subtitle {
+    font-size: 1em;
+    color: #666;
+    margin: 10px 0 20px;
+}
+
+/* Buttons */
+.buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.buttons button {
+    padding: 10px 25px;
+    font-size: 1em;
+    border-radius: 25px;
+    border: 2px solid;
+    background: transparent;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+/* Yes button (pink/red theme) */
+#yes-btn {
+    border-color: #e63946;
+    color: #e63946;
+    font-weight: bold;
+}
+
+#yes-btn:hover {
+    background: #e63946;
+    color: #fff;
+}
+
+/* No button (gray) */
+#no-btn {
+    border-color: #555;
+    color: #555;
+    font-weight: bold;
+    position: relative;
+}
+
+/* Hidden start screen */
+#start-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+}
+
+/* Info Screen */
+#info-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease-in-out;
+  opacity: 1;
+}
+
+#info-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+#info-screen .overlay {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #333;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 30px;
+  border-radius: 25px;
+  max-width: 500px;
+  width: 90%;
+  border: 4px dashed #ff8fab;
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+  font-family: 'Patrick Hand', cursive;
+}
+
+#info-gif {
+  max-width: 200px;
+  margin-bottom: 15px;
+}
+
+#info-screen h1 {
+  font-family: 'Comic Neue', cursive;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  color: #e63946;
+}
+
+#info-screen .subtitle {
+  font-size: 1.1em;
+  color: #444;
+  margin: 10px 0;
+  line-height: 1.4;
+}
+
+#start-game-btn {
+  padding: 12px 25px;
+  font-size: 1.1em;
+  border-radius: 30px;
+  border: 2px solid #e63946;
+  background: transparent;
+  color: #e63946;
+  cursor: pointer;
+  font-family: 'Patrick Hand', cursive;
+  transition: all 0.3s ease;
+}
+
+#start-game-btn:hover {
+  background: #e63946;
+  color: #fff;
+}
+
+
+/* ================== Maze ================== */
+
+canvas {
+    background: rgba(255, 230, 235, 0.85);
+    border: 3px solid #fff;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+    border-radius: 15px;
+    image-rendering: pixelated;
+    backdrop-filter: blur(3px);
+}
+
+
+/* Win Message Container */
+#win-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+    z-index: 1000;
+    transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+    font-family: 'Press Start 2P', monospace;
+    text-align: center;
+}
+
+#win-message.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Chat Box */
+.chat-box {
+    display: flex;
+    align-items: center;
+    background: #222;
+    border: 4px solid #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.7);
+    max-width: 450px;
+    min-height: 140px;
+}
+
+.char-img {
+    width: 100px;
+    height: auto;
+    image-rendering: pixelated;
+    object-fit: contain;
+}
+
+
+/* Text */
+.chat-text {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.4;
+    flex: 1;
+    text-align: left;
+}
+
+.chat-text .name {
+    color: #ff8fab;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.chat-text .dialogue {
+    font-size: 12px;
+    white-space: pre-line;
+}
+
+/* Button */
+#win-message button {
+    margin-top: 15px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background: #ff8fab;
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    transition: 0.2s;
+}
+
+#win-message button:hover {
+    background: #e63946;
+}
+
+
+@keyframes floatHearts {
+    from { transform: translateX(-50%) translateY(0); }
+    to { transform: translateX(-50%) translateY(-20px); }
+}
+
+
+#win-message.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+#win-message.hidden {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+}
+
+/* ================== Mobile Controls ================== */
+#game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+#controls {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+#controls .middle {
+    display: flex;
+    gap: 10px;
+}
+
+#controls button {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5em;
+    border-radius: 15px;
+    border: none;
+    background: #ffb6c1;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    transition: 0.2s;
+}
+
+#controls button:active {
+    background: #e63946;
+}
+
+
+/* ================== Romantic Maze Background ================== */
+#romantic-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.heart {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: pink;
+    clip-path: polygon(
+        50% 0%,
+        61% 10%,
+        75% 0,
+        100% 25%,
+        50% 100%,
+        0 25%,
+        25% 0,
+        39% 10%
+    );
+    opacity: 0.8;
+    animation: fall 8s linear infinite;
+}
+
+.heart:nth-child(1) { left: 10%; animation-duration: 6s; }
+.heart:nth-child(2) { left: 30%; animation-duration: 7s; }
+.heart:nth-child(3) { left: 50%; animation-duration: 9s; }
+.heart:nth-child(4) { left: 70%; animation-duration: 5s; }
+.heart:nth-child(5) { left: 90%; animation-duration: 8s; }
+
+@keyframes fall {
+    0% { transform: translateY(-10vh) scale(1); opacity: 1; }
+    100% { transform: translateY(110vh) scale(0.5); opacity: 0; }
+}
+
+.sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: gold;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: twinkle 3s infinite alternate;
+}
+
+.sparkle:nth-child(6) { top: 20%; left: 40%; }
+.sparkle:nth-child(7) { top: 60%; left: 70%; }
+
+@keyframes twinkle {
+    from { transform: scale(0.5); opacity: 0.3; }
+    to { transform: scale(1.5); opacity: 1; }
+}

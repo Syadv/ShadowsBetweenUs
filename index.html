@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maze Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Start Screen -->
+  <div id="start-screen">
+    <!-- Background thumbnail -->
+    <img src="haha.jpg" alt="Background" class="thumbnail-bg">
+
+    <!-- Overlay content -->
+    <div class="overlay">
+      <!-- Cute gif -->
+      <img src="cat.gif" alt="Cute Gif" id="start-gif">
+
+      <!-- Heading + text -->
+      <h1>Hello<br><span class="highlight">Aam!</span></h1>
+      <p class="subtitle">Do you want to play a game?</p>
+
+      <!-- Buttons -->
+      <div class="buttons">
+        <button id="yes-btn">Yes! I want to play, baby</button>
+        <button id="no-btn">No! I don’t want to play</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Screen -->
+  <div id="info-screen" class="hidden">
+    <img src="haha.jpg" alt="Background" class="thumbnail-bg">
+
+    <div class="overlay">
+      <!-- Cute gif on top -->
+      <img src="hehe.gif" alt="Cute Gif" id="info-gif">
+
+      <h1>Game Details 💕</h1>
+      <p class="subtitle">
+        You will play a cute maze game. 💖<br>
+        Reach the end to unlock a secret message!
+      </p>
+      <p class="subtitle">
+        <strong>Reward:</strong> ????? 😘
+      </p>
+      <p class="subtitle">
+        <strong>How to Play:</strong><br>
+        Use the arrow keys or swipe on mobile to move through the maze and find me!
+      </p>
+      <div class="buttons">
+        <button id="start-game-btn">Start Game 💖</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Game Container -->
+  <div id="game-container">
+    <!-- Animated Background -->
+    <div id="romantic-background">
+      <div class="heart"></div>
+      <div class="heart"></div>
+      <div class="heart"></div>
+      <div class="heart"></div>
+      <div class="heart"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+    </div>
+
+    <canvas id="mazeCanvas"></canvas>
+
+    <!-- Mobile Controls -->
+    <div id="controls">
+      <button data-dir="up">⬆️</button>
+      <div class="middle">
+        <button data-dir="left">⬅️</button>
+        <button data-dir="down">⬇️</button>
+        <button data-dir="right">➡️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Win Message -->
+  <div id="win-message" class="hidden">
+    <div class="chat-box">
+      <img src="shoulderLevel.png" alt="Player" class="char-img" id="chat-img">
+      <div class="chat-text">
+        <p class="name">Sid ❤️</p>
+        <p id="dialogue" class="dialogue">“Yay! You did it so easy huh 🤨”</p>
+      </div>
+    </div>
+
+    <button id="next-btn">Next ➡️</button>
+    <button id="restart-btn" onclick="location.reload()" class="hidden">Play Again 😁</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
