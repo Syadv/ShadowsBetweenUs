@@ -204,6 +204,16 @@ canvas {
     backdrop-filter: blur(3px);
 }
 
+/* New Question Header */
+#maze-question {
+    font-family: 'Comic Sans MS', 'Patrick Hand', cursive;
+    color: #e63946;
+    margin-bottom: 10px;
+    font-size: 1.5em;
+    text-shadow: 2px 2px #fff;
+    z-index: 10;
+}
+
 
 /* Win Message Container */
 #win-message {
