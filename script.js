@@ -28,11 +28,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // =============== MEMORIES ===============
     const memories = [
-        { src: "mem1.jpg" }, 
-        { src: "mem2.jpg" },
-        { src: "mem3.jpg" },
-        { src: "mem4.jpg" },
-        { src: "mem5.jpg" }
+        { src: "mem1.png" }, 
+        { src: "mem2.png" },
+        { src: "mem3.png" },
+        { src: "mem4.png" },
+        { src: "mem5.png" }
     ];
     let memoryIndex = 0;
 
