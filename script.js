@@ -6,50 +6,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
     const winMessage = document.getElementById('win-message');
     
+    // Overlays
+    const memoryOverlay = document.getElementById('memory-overlay');
+    const memoryImgEl = document.getElementById('memory-img');
+    const closeMemoryBtn = document.getElementById('close-memory-btn');
+    
+    // Video Elements
+    const videoOverlay = document.getElementById('video-overlay');
+    const danceVideo = document.getElementById('dance-video');
+
     // Audio Elements
     const bgMusic = document.getElementById('bg-music');
     const cheerSound = document.getElementById('cheer-sound');
     const sadSound = document.getElementById('sad-sound');
+    const snackSound = document.getElementById('snack-sound'); 
 
     let gameStarted = false;
     let gameWon = false;
+    let gamePaused = false; 
+    let frameCount = 0; 
 
-    // =============== No Button Avoids Cursor ===============
-    noBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        moveNoButton();
-    });
+    // =============== MEMORIES ARRAY ===============
+    const memories = [
+        { src: "mem1.png" }, 
+        { src: "mem2.png" },
+        { src: "mem3.png" },
+        { src: "mem4.png" },
+        { src: "mem5.png" }
+    ];
+    let memoryIndex = 0;
 
-    noBtn.addEventListener('mouseenter', () => {
-        moveNoButton();
-    });
+    // =============== No Button Logic ===============
+    noBtn.addEventListener('click', (e) => { e.preventDefault(); moveNoButton(); });
+    noBtn.addEventListener('mouseenter', () => { moveNoButton(); });
 
     function moveNoButton() {
         const padding = 50; 
-        
         const screenWidth = window.innerWidth;
         const screenHeight = window.innerHeight;
         const btnWidth = noBtn.offsetWidth;
         const btnHeight = noBtn.offsetHeight;
-
-        const minX = padding;
-        const maxX = screenWidth - btnWidth - padding;
-        
-        const minY = padding;
-        const maxY = screenHeight - btnHeight - padding;
-
-        const safeMaxX = Math.max(minX, maxX);
-        const safeMaxY = Math.max(minY, maxY);
-
-        const randomX = Math.floor(Math.random() * (safeMaxX - minX)) + minX;
-        const randomY = Math.floor(Math.random() * (safeMaxY - minY)) + minY;
-
+        const safeMaxX = Math.max(padding, screenWidth - btnWidth - padding);
+        const safeMaxY = Math.max(padding, screenHeight - btnHeight - padding);
+        const randomX = Math.floor(Math.random() * (safeMaxX - padding)) + padding;
+        const randomY = Math.floor(Math.random() * (safeMaxY - padding)) + padding;
         noBtn.style.position = 'fixed';
         noBtn.style.left = `${randomX}px`;
         noBtn.style.top = `${randomY}px`;
     }
 
-    // =============== Start Game on Yes ===============
+    // =============== Start Game ===============
     const infoScreen = document.getElementById('info-screen');
     const startGameBtn = document.getElementById('start-game-btn');
 
@@ -64,41 +70,67 @@ document.addEventListener('DOMContentLoaded', () => {
         infoScreen.classList.add('hidden');
         document.addEventListener('keydown', movePlayer);
         
-        // Play music when game starts
-        bgMusic.volume = 0.5; 
-        bgMusic.play().catch(error => console.log("Music play failed:", error));
+        if(bgMusic) {
+            bgMusic.volume = 0.5; 
+            bgMusic.play().catch(error => console.log("Music play failed:", error));
+        }
         
         gameLoop();
     });
 
-    // =============== Maze Code (19x19 Larger Maze) ===============
-    // 0 = Path, 1 = Wall, 2 = YES (Exit), 3 = NO (Restart)
+    // =============== FIXED MAZE LAYOUT (23x23) ===============
+    // 0=Path, 1=Wall, 2=Exit, 3=Reset, 4=Matcha, 5=Polaroid, 6=Video
     const maze = [
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1], // Start (1,1)
-        [1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1],
-        [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
-        [1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-        [1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1],
-        [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-        [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-        [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
-        [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-        [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-        [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-        [1, 3, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2], // 3=NO (Left), 2=YES (Right)
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,4,0,1,0,0,0,0,0,1,5,1,0,0,0,1], // Start at [1,1]
+        [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0,1,1,1],
+        [1,0,1,0,0,0,1,5,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1],
+        [1,0,0,0,4,0,0,0,0,0,0,0,1,0,0,0,0,0,4,0,0,0,1],
+        [1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0,1,1,1,1,1],
+        [1,6,0,0,1,0,0,0,5,0,0,0,1,0,0,0,1,0,0,0,0,0,1], 
+        [1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,0,1],
+        [1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,4,0,0,1,0,1,0,1],
+        [1,0,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
+        [1,0,0,0,1,0,0,0,0,0,0,0,4,0,0,0,1,0,1,0,0,0,1],
+        [1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,1,0,1,5,1,0,0,0,1,0,0,0,0,0,1], 
+        [1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1],
+        [1,4,0,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,4,0,1,0,1],
+        [1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1],
+        [1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,5,0,1,0,0,0,1], 
+        [1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1],
+        [1,0,0,0,1,4,0,0,1,0,0,0,0,0,1,0,1,0,0,0,4,0,1],
+        [1,1,1,0,1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1],
+        [1,3,0,0,0,0,1,4,0,0,2,0,0,0,0,0,0,0,0,0,0,0,1], // FIXED: Open path to 2 (Exit)
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
-    const cellSize = 42; 
+    // INCREASED SIZE for better visibility
+    const cellSize = 40; 
     
-    canvas.width = maze[0].length * cellSize;
-    canvas.height = maze.length * cellSize;
+    // High-DPI Scaling
+    const dpr = window.devicePixelRatio || 1;
+    const mazeWidth = maze[0].length * cellSize;
+    const mazeHeight = maze.length * cellSize;
+    
+    canvas.width = mazeWidth * dpr;
+    canvas.height = mazeHeight * dpr;
+    canvas.style.width = `${mazeWidth}px`;
+    canvas.style.height = `${mazeHeight}px`;
+    ctx.scale(dpr, dpr);
+
+    // Images
+    const playerImg = new Image(); playerImg.src = "ami.png";
+    const exitImg = new Image(); exitImg.src = "me.png";
+    const snackImg = new Image(); snackImg.src = "matcha.png";
+    const cameraImg = new Image(); cameraImg.src = "camera.png"; 
+
+    // Wall Gradient
+    const wallGradient = ctx.createLinearGradient(0, 0, mazeWidth, mazeHeight);
+    wallGradient.addColorStop(0, "#4cc9f0");
+    wallGradient.addColorStop(0.5, "#4cc9f0");
+    wallGradient.addColorStop(1, "#4cc9f0");
 
     let player = { x: 1, y: 1 };
     let particles = [];
@@ -107,9 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         particles.push({
             x: x * cellSize + cellSize / 2,
             y: y * cellSize + cellSize / 2,
-            size: Math.random() * 4 + 4,
-            opacity: 1,
-            life: 40
+            size: Math.random() * 4 + 4, opacity: 1, life: 40
         });
     }
 
@@ -120,93 +150,135 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.globalAlpha = p.opacity;
             ctx.fillStyle = "pink";
             ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.arc(p.x - p.size / 2, p.y - p.size / 3, p.size / 3, 0, Math.PI, true);
-            ctx.arc(p.x + p.size / 2, p.y - p.size / 3, p.size / 3, 0, Math.PI, true);
-            ctx.lineTo(p.x, p.y + p.size / 2);
-            ctx.closePath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
-            p.y += 0.3;
-            p.opacity -= 0.02;
-            p.life--;
-            if (p.life <= 0 || p.opacity <= 0) particles.splice(i, 1);
+            p.y += 0.3; p.opacity -= 0.02; p.life--;
+            if (p.life <= 0) particles.splice(i, 1);
         }
     }
 
-    const playerImg = new Image();
-    playerImg.src = "ami.png";
-
-    const exitImg = new Image();
-    exitImg.src = "me.png";
-
     function drawMaze() {
+        const floatOffset = Math.sin(frameCount * 0.1) * 3; 
+
         for (let row = 0; row < maze.length; row++) {
             for (let col = 0; col < maze[row].length; col++) {
-                if (maze[row][col] === 1) {
-                    const gradient = ctx.createLinearGradient(0, 0, cellSize, cellSize);
-                    gradient.addColorStop(0, "#ff8fab");
-                    gradient.addColorStop(0.5, "#9d4edd");
-                    gradient.addColorStop(1, "#4cc9f0");
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                const tile = maze[row][col];
+                const x = col * cellSize;
+                const y = row * cellSize;
+
+                if (tile === 1) {
+                    ctx.fillStyle = wallGradient;
+                    ctx.fillRect(x, y, cellSize, cellSize);
                 } else {
                     ctx.fillStyle = "#ffe6eb";
-                    ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+                    ctx.fillRect(x, y, cellSize, cellSize);
                     
-                    ctx.font = "bold 14px Arial"; 
-                    ctx.textAlign = "center";
-                    
-                    if (maze[row][col] === 2) {
-                        ctx.fillStyle = "#e63946";
-                        ctx.fillText("YES", col * cellSize + cellSize/2, row * cellSize + 15);
-                    } else if (maze[row][col] === 3) {
-                        ctx.fillStyle = "#555";
-                        ctx.fillText("NO", col * cellSize + cellSize/2, row * cellSize + 15);
+                    if (tile === 2) { // YES
+                        ctx.fillStyle = "#e63946"; ctx.font = "bold 14px Arial";
+                        ctx.fillText("YES", x + cellSize/2 - 12, y + cellSize/2 + 5);
+                    } else if (tile === 3) { // NO
+                        ctx.fillStyle = "#555"; ctx.font = "bold 14px Arial";
+                        ctx.fillText("NO", x + cellSize/2 - 10, y + cellSize/2 + 5);
+                    } else if (tile === 4) { // Matcha
+                        drawItem(snackImg, x, y, floatOffset, "#88c999");
+                    } else if (tile === 5) { // Polaroid
+                        drawItem(cameraImg, x, y, floatOffset, "#333");
+                    } else if (tile === 6) { // Video Easter Egg
+                        ctx.fillStyle = "#ff69b4"; 
+                        ctx.font = "24px Arial"; // Bigger music note
+                        ctx.fillText("🎵", x + 10, y + 28 + floatOffset);
                     }
                 }
             }
         }
-        ctx.imageSmoothingEnabled = false;
-        
-        const exitX = maze[0].length - 2; 
-        const exitY = maze.length - 2;
-        
-        ctx.drawImage(exitImg, exitX * cellSize, exitY * cellSize, cellSize, cellSize);
+        // Draw Exit (Me)
+        // Manual check for exit position in row 21
+        const exitX = 11; const exitY = 21; 
+        // Draw ME bigger (full cell)
+        if (exitImg.complete) ctx.drawImage(exitImg, exitX*cellSize, exitY*cellSize, cellSize, cellSize);
+    }
+
+    function drawItem(img, x, y, offset, fallbackColor) {
+        if (img.complete && img.naturalHeight !== 0) {
+            // Draw FULL SIZE (no padding) for better visibility
+            ctx.drawImage(img, x, y + offset, cellSize, cellSize);
+        } else {
+            ctx.fillStyle = fallbackColor;
+            ctx.beginPath();
+            ctx.arc(x + cellSize/2, y + cellSize/2 + offset, 10, 0, Math.PI*2);
+            ctx.fill();
+        }
     }
 
     function drawPlayer() {
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(playerImg, player.x * cellSize, player.y * cellSize, cellSize, cellSize);
+        if (playerImg.complete) {
+             // Draw PLAYER FULL SIZE (no padding)
+             ctx.drawImage(playerImg, player.x * cellSize, player.y * cellSize, cellSize, cellSize);
+        } else {
+            ctx.fillStyle = "red";
+            ctx.fillRect(player.x * cellSize, player.y * cellSize, cellSize, cellSize);
+        }
+    }
+
+    // --- LOGIC FOR MEMORIES & VIDEO ---
+
+    function showMemory() {
+        gamePaused = true; 
+        const mem = memories[memoryIndex % memories.length];
+        memoryImgEl.src = mem.src;
+        memoryOverlay.classList.remove('hidden');
+        memoryIndex++;
+    }
+
+    closeMemoryBtn.addEventListener('click', () => {
+        memoryOverlay.classList.add('hidden');
+        gamePaused = false; 
+    });
+
+    function triggerVideo() {
+        gamePaused = true;
+        if(bgMusic) bgMusic.pause(); 
+        
+        videoOverlay.classList.remove('hidden');
+        danceVideo.currentTime = 0;
+        danceVideo.play().catch(e => console.log("Video play error", e));
+
+        danceVideo.onended = () => {
+            videoOverlay.classList.add('hidden');
+            if(bgMusic) bgMusic.play(); 
+            gamePaused = false;
+        };
     }
 
     function checkTile(x, y) {
         const tile = maze[y][x];
-        if (tile === 2) { // YES - Player wins
+        if (tile === 2) { // WIN
             gameWon = true;
             winMessage.classList.remove('hidden');
             winMessage.classList.add('visible');
-            
-            // Play Cheer Sound
-            cheerSound.volume = 0.8;
-            cheerSound.play().catch(e => console.log("Cheer sound failed", e));
-            
-        } else if (tile === 3) { // NO - Reset
-            player.x = 1;
-            player.y = 1;
-            
-            // Play Sad Sound
-            sadSound.volume = 0.8;
-            sadSound.currentTime = 0; // Reset sound to start if played rapidly
-            sadSound.play().catch(e => console.log("Sad sound failed", e));
+            if(cheerSound) cheerSound.play().catch(e => {});
+        } else if (tile === 3) { // RESET
+            player.x = 1; player.y = 1;
+            if(sadSound) sadSound.play().catch(e => {});
+        } else if (tile === 4) { // MATCHA
+            maze[y][x] = 0;
+            if(snackSound) { snackSound.currentTime = 0; snackSound.play().catch(e => {}); }
+        } else if (tile === 5) { // CAMERA
+            maze[y][x] = 0;
+            if(snackSound) { snackSound.currentTime = 0; snackSound.play().catch(e => {}); }
+            showMemory();
+        } else if (tile === 6) { // EASTER EGG VIDEO
+            maze[y][x] = 0; 
+            triggerVideo();
         }
     }
 
     function movePlayer(e) {
-        if (gameWon) return;
+        if (gameWon || gamePaused) return; 
+        
         let newX = player.x;
         let newY = player.y;
-
         createParticle(player.x, player.y);
 
         switch (e.key) {
@@ -222,27 +294,15 @@ document.addEventListener('DOMContentLoaded', () => {
             checkTile(newX, newY);
         }
     }
-
-    document.querySelectorAll("#controls button").forEach(btn => {
-        btn.addEventListener("click", () => {
-            let dir = btn.getAttribute("data-dir");
-            let event = { key: "" };
-            if (dir === "up") event.key = "ArrowUp";
-            if (dir === "down") event.key = "ArrowDown";
-            if (dir === "left") event.key = "ArrowLeft";
-            if (dir === "right") event.key = "ArrowRight";
-            movePlayer(event);
-        });
-    });
-
-    let touchStartX = 0;
-    let touchStartY = 0;
+    
+    // Mobile Touch
+    let touchStartX = 0, touchStartY = 0;
     canvas.addEventListener("touchstart", (e) => {
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
     });
-
     canvas.addEventListener("touchend", (e) => {
+        if (gamePaused) return;
         let dx = e.changedTouches[0].clientX - touchStartX;
         let dy = e.changedTouches[0].clientY - touchStartY;
         if (Math.abs(dx) > Math.abs(dy)) {
@@ -254,34 +314,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    document.querySelectorAll("#controls button").forEach(btn => {
+        btn.addEventListener("click", () => {
+            let dir = btn.getAttribute("data-dir");
+            let k = "";
+            if (dir==="up") k="ArrowUp"; if(dir==="down") k="ArrowDown";
+            if (dir==="left") k="ArrowLeft"; if(dir==="right") k="ArrowRight";
+            movePlayer({key: k});
+        });
+    });
+
     function gameLoop() {
+        frameCount++;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawMaze();
         drawPlayer();
         drawParticles();
         if (!gameWon) requestAnimationFrame(gameLoop);
     }
-
+    
     const dialogues = [
         { text: "“I knew you'd say Yes! 🥰”", img: "shoulderLevel.png" },
         { text: "“You are my favorite person in the world! 🌎”", img: "shoulderLevel.png" },
         { text: "“I love you so much, my Valentine! 💖”", img: "kissing.png" }
     ];
-
-    let dialogueIndex = 0;
-    const dialogueElement = document.getElementById("dialogue");
-    const chatImg = document.getElementById("chat-img");
-    const nextBtn = document.getElementById("next-btn");
-    const restartBtn = document.getElementById("restart-btn");
-
-    nextBtn.addEventListener("click", () => {
-        dialogueIndex++;
-        if (dialogueIndex < dialogues.length) {
-            dialogueElement.textContent = dialogues[dialogueIndex].text;
-            chatImg.src = dialogues[dialogueIndex].img;
-        } else {
-            nextBtn.classList.add("hidden");
-            restartBtn.classList.remove("hidden");
-        }
-    });
+    let dIndex = 0;
+    const dEl = document.getElementById("dialogue");
+    const cImg = document.getElementById("chat-img");
+    const nBtn = document.getElementById("next-btn");
+    const rBtn = document.getElementById("restart-btn");
+    if(nBtn) {
+        nBtn.addEventListener("click", () => {
+            dIndex++;
+            if (dIndex < dialogues.length) {
+                dEl.textContent = dialogues[dIndex].text;
+                cImg.src = dialogues[dIndex].img;
+            } else {
+                nBtn.classList.add("hidden");
+                rBtn.classList.remove("hidden");
+            }
+        });
+    }
 });

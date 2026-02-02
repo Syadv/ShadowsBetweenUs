@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Maze Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -74,6 +74,20 @@
     </div>
   </div>
 
+  <div id="memory-overlay" class="hidden">
+    <div class="polaroid-frame">
+      <img id="memory-img" src="" alt="Our Memory">
+      <p id="memory-caption">Remember this? ❤️</p>
+      <button id="close-memory-btn">Continue ❤️</button>
+    </div>
+  </div>
+
+  <div id="video-overlay" class="hidden">
+  <video id="dance-video" playsinline>
+    <source src="dance.mp4" type="video/mp4">
+  </video>
+</div>
+
   <div id="win-message" class="hidden">
     <div class="chat-box">
       <img src="shoulderLevel.png" alt="Player" class="char-img" id="chat-img">
@@ -98,6 +112,10 @@
   <audio id="sad-sound">
     <source src="sad.mp3" type="audio/mpeg">
   </audio>
+
+  <audio id="snack-sound">
+  <source src="matcha-bite.mp3" type="audio/mpeg">
+</audio>
 
   <script src="script.js"></script>
 </body>

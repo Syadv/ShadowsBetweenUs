@@ -202,6 +202,12 @@ canvas {
     border-radius: 15px;
     image-rendering: pixelated;
     backdrop-filter: blur(3px);
+    
+    /* Responsive Scaling */
+    max-width: 95vw; /* Keeps it from overflowing on mobile */
+    max-height: 70vh; /* Keeps room for controls below */
+    width: 100%;
+    height: auto;
 }
 
 /* New Question Header */
@@ -408,4 +414,100 @@ canvas {
 @keyframes twinkle {
     from { transform: scale(0.5); opacity: 0.3; }
     to { transform: scale(1.5); opacity: 1; }
+}
+
+/* ================== Memory Overlay Updates ================== */
+
+#memory-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* Slightly darker background to make image pop */
+    backdrop-filter: blur(8px);      /* Stronger blur for focus */
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s ease;
+}
+
+#memory-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+}
+
+.polaroid-frame {
+    /* REMOVED: background, padding, and box-shadow */
+    background: transparent; 
+    padding: 0;
+    box-shadow: none;
+    border: none;
+    
+    /* Keep the animation & centering */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: scale(0.8);
+    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    max-width: 90%;
+}
+
+.polaroid-frame img {
+    max-width: 100%;
+    max-height: 60vh; /* Allow it to be a bit bigger now */
+    border: none;     /* No border on the image itself */
+    display: block;
+    /* Optional: Add a subtle shadow to the image itself if your PNG doesn't have one */
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); 
+}
+
+/* Updated Button to float nicely below the image */
+#close-memory-btn {
+    margin-top: 20px;
+    padding: 12px 30px;
+    background: #e63946; /* Stronger red/pink to stand out */
+    border: 2px solid #fff;
+    color: white;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 1.3em;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    transition: transform 0.2s;
+}
+
+#close-memory-btn:hover {
+    transform: scale(1.05);
+    background: #ff8fab;
+}
+
+@keyframes popIn {
+    to { transform: scale(1); }
+}
+
+/* ================== Easter Egg Video ================== */
+#video-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff; /* Pure white for seamless look */
+    z-index: 4000;       /* Above everything else */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#video-overlay.hidden {
+    display: none;
+}
+
+#dance-video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
