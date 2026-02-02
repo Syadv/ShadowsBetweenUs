@@ -26,13 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let gamePaused = false; 
     let frameCount = 0; 
 
-    // =============== MEMORIES ARRAY ===============
+    // =============== MEMORIES ===============
     const memories = [
-        { src: "mem1.png" }, 
-        { src: "mem2.png" },
-        { src: "mem3.png" },
-        { src: "mem4.png" },
-        { src: "mem5.png" }
+        { src: "mem1.jpg" }, 
+        { src: "mem2.jpg" },
+        { src: "mem3.jpg" },
+        { src: "mem4.jpg" },
+        { src: "mem5.jpg" }
     ];
     let memoryIndex = 0;
 
@@ -78,11 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
         gameLoop();
     });
 
-    // =============== FIXED MAZE LAYOUT (23x23) ===============
+    // =============== MAZE LAYOUT (23x23) ===============
     // 0=Path, 1=Wall, 2=Exit, 3=Reset, 4=Matcha, 5=Polaroid, 6=Video
     const maze = [
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,0,0,0,0,0,0,0,4,0,1,0,0,0,0,0,1,5,1,0,0,0,1], // Start at [1,1]
+        [1,0,0,0,0,0,0,0,4,0,1,0,0,0,0,0,1,5,1,0,0,0,1],
         [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0,1,1,1],
         [1,0,1,0,0,0,1,5,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
         [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1],
@@ -102,22 +102,25 @@ document.addEventListener('DOMContentLoaded', () => {
         [1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1],
         [1,0,0,0,1,4,0,0,1,0,0,0,0,0,1,0,1,0,0,0,4,0,1],
         [1,1,1,0,1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,1,1,0,1],
-        [1,3,0,0,0,0,1,4,0,0,2,0,0,0,0,0,0,0,0,0,0,0,1], // FIXED: Open path to 2 (Exit)
+        [1,3,0,0,0,0,1,4,0,0,0,2,0,0,0,0,0,0,0,0,0,0,1], // Exit (2)
         [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
 
-    // INCREASED SIZE for better visibility
     const cellSize = 40; 
     
-    // High-DPI Scaling
+    // === MOBILE SCALING FIX ===
+    // 1. We keep the INTERNAL resolution high (dpr) for crispness.
+    // 2. We DO NOT set canvas.style.width/height in JS anymore.
+    // 3. We let the CSS 'max-width: 95vw' handle the visual sizing.
+    
     const dpr = window.devicePixelRatio || 1;
     const mazeWidth = maze[0].length * cellSize;
     const mazeHeight = maze.length * cellSize;
     
     canvas.width = mazeWidth * dpr;
     canvas.height = mazeHeight * dpr;
-    canvas.style.width = `${mazeWidth}px`;
-    canvas.style.height = `${mazeHeight}px`;
+    
+    // Scale drawing context so your 40px coordinates work on the big canvas
     ctx.scale(dpr, dpr);
 
     // Images
@@ -128,8 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Wall Gradient
     const wallGradient = ctx.createLinearGradient(0, 0, mazeWidth, mazeHeight);
-    wallGradient.addColorStop(0, "#4cc9f0");
-    wallGradient.addColorStop(0.5, "#4cc9f0");
+    wallGradient.addColorStop(0, "#ff8fab");
+    wallGradient.addColorStop(0.5, "#9d4edd");
     wallGradient.addColorStop(1, "#4cc9f0");
 
     let player = { x: 1, y: 1 };
@@ -186,22 +189,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         drawItem(cameraImg, x, y, floatOffset, "#333");
                     } else if (tile === 6) { // Video Easter Egg
                         ctx.fillStyle = "#ff69b4"; 
-                        ctx.font = "24px Arial"; // Bigger music note
+                        ctx.font = "24px Arial"; 
                         ctx.fillText("🎵", x + 10, y + 28 + floatOffset);
                     }
                 }
             }
         }
-        // Draw Exit (Me)
-        // Manual check for exit position in row 21
+        
+        // Draw Exit
         const exitX = 11; const exitY = 21; 
-        // Draw ME bigger (full cell)
         if (exitImg.complete) ctx.drawImage(exitImg, exitX*cellSize, exitY*cellSize, cellSize, cellSize);
     }
 
     function drawItem(img, x, y, offset, fallbackColor) {
         if (img.complete && img.naturalHeight !== 0) {
-            // Draw FULL SIZE (no padding) for better visibility
             ctx.drawImage(img, x, y + offset, cellSize, cellSize);
         } else {
             ctx.fillStyle = fallbackColor;
@@ -213,7 +214,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function drawPlayer() {
         if (playerImg.complete) {
-             // Draw PLAYER FULL SIZE (no padding)
              ctx.drawImage(playerImg, player.x * cellSize, player.y * cellSize, cellSize, cellSize);
         } else {
             ctx.fillStyle = "red";
